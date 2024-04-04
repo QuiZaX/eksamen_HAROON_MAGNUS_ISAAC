@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 
 app = Flask(__name__)
@@ -38,7 +38,8 @@ def login():
     username = request.form['username']
     password = request.form['password']
     if user_exists(username):
-        return redirect(url_for('success', username=username))
+        session['username'] = username  # Store username in session
+        return redirect(url_for('home', username=username))  # Redirect to home page
     else:
         return "User does not exist. Please register first."
 
@@ -57,6 +58,23 @@ def register():
 @app.route('/success/<username>')
 def success(username):
     return f"Welcome {username}!"
+
+@app.route('/home')
+def home():
+    if 'username' in session:
+        username = session['username']
+        return render_template('home.html', username=username)
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/login_success')
+def login_success():
+    if 'username' in session:
+        username = session['username']
+        return redirect(url_for('home', username=username))
+    else:
+        return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     create_table()  # Create the database table if it doesn't exist
