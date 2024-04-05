@@ -38,8 +38,16 @@ def login():
     username = request.form['username']
     password = request.form['password']
     if user_exists(username):
-        session['username'] = username  # Store username in session
-        return redirect(url_for('home', username=username))  # Redirect to home page
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''SELECT password FROM users WHERE username = ?''', (username,))
+        stored_password = c.fetchone()[0]
+        conn.close()
+        if password == stored_password:
+            session['username'] = username  # Store username in session
+            return redirect(url_for('home', username=username))  # Redirect to home page
+        else:
+            return "Incorrect password. Please try again."
     else:
         return "User does not exist. Please register first."
 
