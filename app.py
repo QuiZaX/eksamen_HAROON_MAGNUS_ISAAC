@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
+import os
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # Generer en hemmelig nøgle til Flask sessioner
+app.secret_key = "your_secret_key"  # Generate a secret key for Flask sessions
 
-# Funktion til at oprette database
+# Function to create database table
 def create_table():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -12,7 +13,7 @@ def create_table():
     conn.commit()
     conn.close()
 
-# Funktion til at tilføje bruger til databasen
+# Function to add user to the database
 def add_user(username, password):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -20,7 +21,7 @@ def add_user(username, password):
     conn.commit()
     conn.close()
 
-# Funktion til at tjekke om brugeren eksisterer
+# Function to check if user exists
 def user_exists(username):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -44,12 +45,12 @@ def login():
         stored_password = c.fetchone()[0]
         conn.close()
         if password == stored_password:
-            session['username'] = username  # Gemmer brugernavn i session
-            return redirect(url_for('home'))  # Ændret til at omdirigere til 'home'
+            session['username'] = username  # Save username in session
+            return redirect(url_for('home'))  # Redirect to 'home'
         else:
-            return "Forkert adgangskode. Prøv igen."
+            return "Wrong password. Please try again."
     else:
-        return "Brugeren eksisterer ikke. Registrer dig venligst først."
+        return "User does not exist. Please register first."
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -60,12 +61,12 @@ def register():
             add_user(username, password)
             return redirect(url_for('index'))
         else:
-            return "Brugeren findes allerede. Vælg venligst et andet brugernavn."
+            return "User already exists. Please choose a different username."
     return render_template('register.html')
 
 @app.route('/success/<username>')
 def success(username):
-    return f"Velkommen {username}!"
+    return f"Welcome {username}!"
 
 @app.route('/home')
 def home():
@@ -82,14 +83,15 @@ def login_success():
     else:
         return redirect(url_for('index'))
 
-import os
+@app.route('/shop')
+def shop():
+    return render_template('shop.html')
 
-@app.route('/tournament')
+@app.route('/tunering')
 def tournament():
     template_dir = os.path.abspath('templates')
     return render_template(os.path.join(template_dir, 'tunering.html'))
 
-
 if __name__ == '__main__':
-    create_table()  # Opretter database tabellen hvis den ikke eksisterer
+    create_table()  # Create database table if it doesn't exist
     app.run(debug=True)
