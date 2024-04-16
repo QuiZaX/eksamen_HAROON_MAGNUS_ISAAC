@@ -98,6 +98,19 @@
         }
         .cart-item {
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-item .remove-btn {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
         }
         .cart-total {
             margin-top: 10px;
@@ -185,6 +198,22 @@
                 const newItem = document.createElement('div');
                 newItem.classList.add('cart-item');
                 newItem.textContent = `${name}: ${price} DKK`;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'X';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.addEventListener('click', () => {
+                    total -= price;
+                    itemCount--;
+                    cartCount.textContent = itemCount;
+                    if (itemCount === 0) {
+                        cartCount.style.display = 'none';
+                    }
+                    cartTotal.textContent = `Total: ${total} DKK`;
+                    cartItems.removeChild(newItem);
+                });
+
+                newItem.appendChild(removeBtn);
                 cartItems.appendChild(newItem);
 
                 cartTotal.textContent = `Total: ${total} DKK`;
