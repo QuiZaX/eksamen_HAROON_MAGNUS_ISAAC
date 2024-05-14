@@ -5,150 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Football Team Home</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #005580;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            margin-top: 0;
-        }
-        nav {
-            background-color: #003d4d;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        section {
-            padding: 20px;
-        }
-        footer {
-            background-color: #005580;
-            color: #fff;
-            text-align: center;
-            padding: 10px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
+        /* Your CSS styles */
     </style>
 </head>
 <body>
     <header>
         <h1>Ålholm IF</h1>
     </header>
-     <nav>
-        <a href="#">Home</a>
-        <a href="tunering.html">Kampe/tunering</a>
-        <a href="#">Spillere</a>
-        <a href="#">Nyheder</a>
-        <a href="#">Kontakt</a>
+    <nav>
+        <!-- Navigation links -->
     </nav>
     <section>
-        <h2>Indtast kampoplysninger</h2>
-        <form id="tournament_form" action="/tournament_results" method="post">
-            <label for="num_teams">Antal hold i turneringen:</label>
-            <input type="number" id="num_teams" name="num_teams">
-            <div id="match_inputs"></div>
-            <button type="submit">Se turneringsresultater</button>
+        <h2>Velkommen til Ålholm IF hjemmeside</h2>
+        <p>Her kommer der opdateringer om holdet, du kan købe trøjer og se afviklingen af turneringer og kampe</p>
+
+        <!-- Form to input team names -->
+        <form action="/save_team" method="post">
+            <label for="team_name">Indtast holdnavn:</label><br>
+            <input type="text" id="team_name" name="team_name" required><br><br>
+            <input type="submit" value="Gem holdnavn">
         </form>
     </section>
-    <section id="results_section" style="display: none;">
-        <h2>Turneringsresultater</h2>
-        <table id="results_table">
-            <thead>
-                <tr>
-                    <th>Placering</th>
-                    <th>Hold</th>
-                </tr>
-            </thead>
-            <tbody id="results_table_body">
-                <!-- Resultater indsættes dynamisk her -->
-            </tbody>
-        </table>
-    </section>
-    <!-- JavaScript til at tilføje inputfelter til kampoplysninger baseret på antal hold -->
-    <script>
-        document.getElementById('num_teams').addEventListener('input', function() {
-            var numTeams = parseInt(this.value);
-            var matchInputsDiv = document.getElementById('match_inputs');
-            matchInputsDiv.innerHTML = '';
-
-            // Generate match inputs
-            for (var i = 0; i < numTeams; i++) {
-                for (var j = i + 1; j < numTeams; j++) {
-                    var matchDiv = document.createElement('div');
-                    var matchLabel = document.createElement('label');
-                    var team1Input = document.createElement('input');
-                    var team2Input = document.createElement('input');
-
-                    matchLabel.textContent = 'Kamp ' + (i + 1) + ' vs ' + (j + 1) + ': ';
-                    team1Input.type = 'text';
-                    team1Input.name = 'match_' + (i + 1) + '_vs_' + (j + 1) + '_team1';
-                    team1Input.placeholder = 'Hold ' + (i + 1);
-
-                    team2Input.type = 'text';
-                    team2Input.name = 'match_' + (i + 1) + '_vs_' + (j + 1) + '_team2';
-                    team2Input.placeholder = 'Hold ' + (j + 1);
-
-                    matchDiv.appendChild(matchLabel);
-                    matchDiv.appendChild(team1Input);
-                    matchDiv.appendChild(document.createTextNode(' vs '));
-                    matchDiv.appendChild(team2Input);
-                    matchInputsDiv.appendChild(matchDiv);
-                }
-            }
-        });
-
-        document.getElementById('tournament_form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Forhindrer formularen i at blive sendt
-
-            // Her kan du tilføje logik til at behandle formulardata og vise turneringsresultaterne
-            var numTeams = parseInt(document.getElementById('num_teams').value);
-            var resultsSection = document.getElementById('results_section');
-            var resultsTableBody = document.getElementById('results_table_body');
-
-            // Simulerede data (erstat dette med data fra din backend)
-            var results = [
-                { place: 1, team: "Hold 1" },
-                { place: 2, team: "Hold 2" },
-                { place: 3, team: "Hold 3" },
-                // Tilføj flere hold efter behov
-            ];
-
-            // Vis resultaterne i tabellen
-            resultsTableBody.innerHTML = ''; // Ryd tidligere resultater
-            results.forEach(function(result) {
-                var row = document.createElement('tr');
-                var placeCell = document.createElement('td');
-                var teamCell = document.createElement('td');
-
-                placeCell.textContent = result.place;
-                teamCell.textContent = result.team;
-
-                row.appendChild(placeCell);
-                row.appendChild(teamCell);
-
-                resultsTableBody.appendChild(row);
-            });
-
-            // Vis sektionen med resultater
-            resultsSection.style.display = 'block';
-        });
-    </script>
+    <footer>
+        &copy; Ålholm IF. All rights reserved.
+    </footer>
 </body>
 </html>
