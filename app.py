@@ -77,8 +77,12 @@ def home():
 def save_team():
     if request.method == 'POST':
         team_name = request.form['team_name']
-        save_team_name(team_name)
-        return 'Team name saved successfully!'
+        try:
+            save_team_name(team_name)
+            return 'Team name saved successfully!'
+        except Exception as e:
+            return f'An error occurred: {str(e)}'
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
