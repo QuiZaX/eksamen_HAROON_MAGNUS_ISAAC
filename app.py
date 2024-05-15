@@ -89,6 +89,14 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+@app.route('/turnering')
+def turnering():
+    return render_template('turnering.html')
+
+@app.route('/shop')
+def shop():
+    return render_template('shop.html')
+
 if __name__ == '__main__':
     create_tables()  # Create database tables if they don't exist
     app.run(debug=True)

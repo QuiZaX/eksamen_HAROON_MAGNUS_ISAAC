@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Football Team Shop</title>
     <style>
+        /* Your CSS styles here */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -119,12 +120,12 @@
         <h1>Ålholm IF</h1>
     </header>
     <nav>
-        <a href="#">Home</a>
+        <a href="/home">Home</a>
         <a href="tunering.html">Kampe/tunering</a>
         <a href="#">Spillere</a>
         <a href="#">Nyheder</a>
         <a href="#" class="cart-icon">
-            <img src="soppingcart.jpg" alt="Shopping Cart">
+            <img src="{{ url_for('static', filename='soppingcart.jpg') }}" alt="Shopping Cart">
             <span class="cart-count">0</span>
         </a>
     </nav>
@@ -132,19 +133,19 @@
         <h2>Velkommen til Ålholm IF's Shop</h2>
         <div class="product">
             <h3>Trøje 1</h3>
-            <img src="alholm1.jpg" alt="Trøje 1">
+            <img src="{{ url_for('static', filename='alholm1.jpg') }}" alt="Trøje 1">
             <p>Pris: 250 DKK</p>
             <button class="buy-btn" data-name="Trøje 1" data-price="250">Køb nu</button>
         </div>
         <div class="product">
             <h3>Sokker</h3>
-            <img src="sokker.jpg" alt="Sokker">
+            <img src="{{ url_for('static', filename='sokker.jpg') }}" alt="Sokker">
             <p>Pris: 50 DKK</p>
             <button class="buy-btn" data-name="Sokker" data-price="50">Køb nu</button>
         </div>
         <div class="product">
             <h3>Støvler</h3>
-            <img src="stovler.jpg" alt="Støvler">
+            <img src="{{ url_for('static', filename='stovler.jpg') }}" alt="Støvler">
             <p>Pris: 750 DKK</p>
             <button class="buy-btn" data-name="støvler" data-price="750">Køb nu</button>
         </div>
@@ -163,48 +164,7 @@
     </div>
 
     <script>
-        const buyButtons = document.querySelectorAll('.buy-btn');
-        const cartItems = document.querySelector('.cart-items');
-        const cartTotal = document.querySelector('.cart-total');
-        const cart = document.querySelector('.cart');
-        const cartIcon = document.querySelector('.cart-icon');
-        const cartCount = document.querySelector('.cart-count');
-        const checkoutBtn = document.querySelector('.checkout-btn'); // Selecting the checkout button
-        let total = 0;
-        let itemCount = 0;
-
-        buyButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const name = button.dataset.name;
-                const price = parseInt(button.dataset.price);
-                total += price;
-                itemCount++;
-                cartCount.textContent = itemCount;
-                cartCount.style.display = 'inline';
-
-                const newItem = document.createElement('div');
-                newItem.classList.add('cart-item');
-                newItem.textContent = `${name}: ${price} DKK`;
-                cartItems.appendChild(newItem);
-
-                cartTotal.textContent = `Total: ${total} DKK`;
-
-                cart.style.display = 'block';
-                setTimeout(() => {
-                    cart.style.display = 'none';
-                }, 4000); // Hide after 4 seconds
-            });
-        });
-
-        cartIcon.addEventListener('click', () => {
-            cart.style.display = cart.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Checkout functionality
-        checkoutBtn.addEventListener('click', () => {
-            alert(`Checkout - Total amount: ${total} DKK`);
-            // Here you can add further actions like redirecting to a payment page or clearing the cart
-        });
+        // Your JavaScript code here
     </script>
 </body>
 </html>
