@@ -19,43 +19,46 @@ conn.close()
 random.shuffle(teamlist)
 print("Teams randomized for initial seeding:", teamlist)
 
-# In a single elimination tournament with a full field, the number of games is the number of teams - 1
-totalgames = len(teamlist) - 1
-
 # Set defaults
 gameid = 0
-roundid = 0
-nextround = []
 
 # Simulate all of the games
-while gameid < totalgames:
+while len(teamlist) > 1:  # Loop until there's only one winner
     if gameid in [8, 12, 14]:  # This is a manual decision tree, doesn't scale at all
         # If a new round begins, reset the list of the next round
         print("--- Starting a new round of games ---")
-        teamlist = nextround
-        nextround = []
-        roundid = 0
+        gameid = 0  # Reset gameid for the new round
+        print("Next round matchup list:", teamlist)
 
-    # Compare the 1st entry in the list to the 2nd entry in the list
-    home_team = teamlist[roundid]
-    away_team = teamlist[roundid + 1]
+    # Set roundid to 0 at the beginning of each round
+    roundid = 0
 
-    # Input scores from admin for each team
-    score_home = int(input(f"Enter the score for Team {home_team}: "))
-    score_away = int(input(f"Enter the score for Team {away_team}: "))
+    # Simulate games within the round
+    while roundid < len(teamlist) - 1:  # Ensure roundid doesn't go out of range
+        home_team = teamlist[roundid]
+        away_team = teamlist[roundid + 1]
 
-    # The winner of the match becomes the next entry in the nextround list
-    if score_home > score_away:
-        nextround.append(home_team)
-        print(f"{home_team} vs {away_team}: The winner is {home_team}")
-    else:
-        nextround.append(away_team)
-        print(f"{home_team} vs {away_team}: The winner is {away_team}")
+        # Input scores from admin for each team
+        try:
+            score_home = int(input(f"Enter the score for Team {home_team}: "))
+            score_away = int(input(f"Enter the score for Team {away_team}: "))
+        except ValueError:
+            print("Invalid input. Please enter a valid integer score.")
+            continue
 
-    # Increase the gameid and roundid
+        # Remove the losing team from the list
+        if score_home > score_away:
+            teamlist.remove(away_team)
+            print(f"{home_team} vs {away_team}: The winner is {home_team}")
+        else:
+            teamlist.remove(home_team)
+            print(f"{home_team} vs {away_team}: The winner is {away_team}")
+
+        # Increase the roundid
+        roundid += 2
+
+    # Increase the gameid
     gameid += 1
-    roundid += 2
-    print("Next round matchup list:", nextround)
 
 # Output the final winner
-print("Champion is:", nextround[0])
+print("Champion is:", teamlist[0])
