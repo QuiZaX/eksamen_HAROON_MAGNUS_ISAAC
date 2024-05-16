@@ -68,6 +68,19 @@
             padding: 10px;
             margin-bottom: 5px;
         }
+        .matches-button {
+            display: block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #005580;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .matches-button:hover {
+            background-color: #003d4d;
+        }
     </style>
 </head>
 <body>
@@ -94,6 +107,8 @@
 
         <h3>Registered Teams:</h3>
         <ul id="teamList" class="team-list"></ul>
+
+        <a href="{{ url_for('matches') }}" class="matches-button">Go to Matches</a>
     </section>
     <footer>
         &copy; Ålholm IF. All rights reserved.
