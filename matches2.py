@@ -9,12 +9,18 @@ tournament_name = input("Enter the tournament name: ").replace(" ", "_")
 conn = sqlite3.connect('C:/Users/45223/PycharmProjects/Eksamen/eksamen/teams.db')
 cursor = conn.cursor()
 
-# Fetch teams from the database
-cursor.execute("SELECT name FROM teams")
+# Fetch teams from the 'selected_teams' table in the database
+cursor.execute("SELECT name FROM selected_teams")
 teams_data = cursor.fetchall()
 
 # Extract team names from the fetched data
 teams = [team[0] for team in teams_data]
+
+# Display the teams in the tournament
+print("Teams in the tournament:")
+for team in teams:
+    print(team)
+print()  # Newline for better readability
 
 # Close the database connection
 conn.close()

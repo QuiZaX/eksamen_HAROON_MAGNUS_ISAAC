@@ -108,7 +108,7 @@
         <h3>Registered Teams:</h3>
         <ul id="teamList" class="team-list"></ul>
 
-        <a href="{{ url_for('matches') }}" class="matches-button">Go to Matches</a>
+        <button id="saveSelectedTeams" class="matches-button">Save Selected Teams</button>
     </section>
     <footer>
         &copy; Ålholm IF. All rights reserved.
@@ -127,7 +127,11 @@
                     teamList.innerHTML = '';
                     data.forEach(team => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = team.name;
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.value = team.id;
+                        listItem.appendChild(checkbox);
+                        listItem.appendChild(document.createTextNode(team.name));
                         teamList.appendChild(listItem);
                     });
                 });
@@ -143,15 +147,43 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (response.ok) {
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
                     document.getElementById("popup").style.display = "block";
                     setTimeout(function() {
                         document.getElementById("popup").style.display = "none";
                     }, 3000);
                     fetchTeamNames();
                 } else {
-                    alert('Error saving team name');
+                    alert('Error saving team name: ' + data.error);
+                }
+            });
+        });
+
+        document.getElementById("saveSelectedTeams").addEventListener("click", function() {
+            const selectedTeams = [];
+            document.querySelectorAll('#teamList input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedTeams.push(checkbox.value);
+            });
+
+            fetch('/save_selected_teams', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selected_teams: selectedTeams })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById("popup").style.display = "block";
+                    setTimeout(function() {
+                        document.getElementById("popup").style.display = "none";
+                    }, 3000);
+                    fetchTeamNames();
+                } else {
+                    alert('Error saving selected teams: ' + data.error);
                 }
             });
         });

@@ -22,44 +22,6 @@ def create_initial_tables():
     conn.commit()
     conn.close()
 
-# Function to dynamically create tournament tables if they do not exist
-def create_dynamic_tables(tournament_name):
-    conn = sqlite3.connect('leaderboard.db')
-    c = conn.cursor()
-
-    c.execute(f'''
-        CREATE TABLE IF NOT EXISTS "{tournament_name}_groups" (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            group_name TEXT NOT NULL,
-            team_name TEXT NOT NULL
-        )
-    ''')
-
-    c.execute(f'''
-        CREATE TABLE IF NOT EXISTS "{tournament_name}_matches" (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            group_name TEXT NOT NULL,
-            team1 TEXT NOT NULL,
-            team2 TEXT NOT NULL,
-            goals_team1 INTEGER NOT NULL,
-            goals_team2 INTEGER NOT NULL,
-            result TEXT NOT NULL,
-            knockout INTEGER NOT NULL
-        )
-    ''')
-
-    c.execute(f'''
-        CREATE TABLE IF NOT EXISTS "{tournament_name}_standings" (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            group_name TEXT NOT NULL,
-            team_name TEXT NOT NULL,
-            points INTEGER NOT NULL
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
-
 # Function to add user to the database
 def add_user(username, password):
     conn = sqlite3.connect('users.db')
@@ -89,89 +51,44 @@ def save_team_name(team_name):
 def get_team_names():
     conn = sqlite3.connect('teams.db')
     c = conn.cursor()
-    c.execute('''SELECT name FROM teams''')
+    c.execute('''SELECT id, name FROM teams''')
     teams = c.fetchall()
     conn.close()
     return teams
 
-# Function to get leaderboard data
-def get_leaderboard_data(tournament_name):
-    conn = sqlite3.connect('leaderboard.db')
-    conn.row_factory = sqlite3.Row
+# Function to create a new table for selected teams
+def create_selected_teams_table():
+    conn = sqlite3.connect('teams.db')
     c = conn.cursor()
-    try:
-        c.execute(f'SELECT group_name, team_name, points FROM "{tournament_name}_standings" ORDER BY points DESC')
-        standings = c.fetchall()
-        logging.debug(f"Standings for {tournament_name}: {standings}")
-    except sqlite3.OperationalError as e:
-        logging.error(f"Database error: {e}")
-        standings = []
-    leaderboard = [{'group_name': row['group_name'], 'team_name': row['team_name'], 'points': row['points']} for row in standings]
+    c.execute('''CREATE TABLE IF NOT EXISTS selected_teams (id INTEGER PRIMARY KEY, name TEXT)''')
+    conn.commit()
     conn.close()
-    return leaderboard
 
-# Function to get groups and teams data
-def get_groups_data(tournament_name):
-    conn = sqlite3.connect('leaderboard.db')
-    conn.row_factory = sqlite3.Row
+# Function to save selected teams into the new table
+def save_selected_teams_to_db(selected_teams):
+    conn = sqlite3.connect('teams.db')
     c = conn.cursor()
-    try:
-        c.execute(f'SELECT id, group_name, team_name FROM "{tournament_name}_groups"')
-        groups = c.fetchall()
-        logging.debug(f"Groups for {tournament_name}: {groups}")
-    except sqlite3.OperationalError as e:
-        logging.error(f"Database error: {e}")
-        groups = []
+    c.execute('DELETE FROM selected_teams')  # Clear previous selections
+    for i, team_id in enumerate(selected_teams):
+        team_name = f"team {i + 1}"
+        c.execute('INSERT INTO selected_teams (id, name) VALUES (?, ?)', (team_id, team_name))
+    conn.commit()
     conn.close()
-    return groups
-
-# Function to get match results data and determine the champion
-def get_matches_data(tournament_name):
-    conn = sqlite3.connect('leaderboard.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    try:
-        c.execute(f'SELECT id, group_name, team1, team2, goals_team1, goals_team2, result, knockout FROM "{tournament_name}_matches" ORDER BY id DESC')
-        matches = c.fetchall()
-        logging.debug(f"Matches for {tournament_name}: {matches}")
-
-        # Determine the champion (winner of the last match)
-        if matches:
-            last_match = matches[0]
-            if last_match['goals_team1'] > last_match['goals_team2']:
-                champion = last_match['team1']
-            elif last_match['goals_team1'] < last_match['goals_team2']:
-                champion = last_match['team2']
-            else:
-                champion = "Draw"
-        else:
-            champion = None
-    except sqlite3.OperationalError as e:
-        logging.error(f"Database error: {e}")
-        matches = []
-        champion = None
-    conn.close()
-    return matches, champion
-
-# Function to get all tournament names from the database
-def get_tournament_names():
-    conn = sqlite3.connect('leaderboard.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-    tournament_names = {table[0].split('_')[0] for table in tables if '_' in table[0]}
-    conn.close()
-    return sorted(tournament_names)
 
 @app.route('/get_teams')
 def get_teams():
     teams = get_team_names()
-    return jsonify([{'name': team[0]} for team in teams])
+    return jsonify([{'id': team[0], 'name': team[1]} for team in teams])
 
-@app.route('/api/leaderboard/<tournament_name>', methods=['GET'])
-def get_leaderboard(tournament_name):
-    leaderboard = get_leaderboard_data(tournament_name)
-    return jsonify(leaderboard)
+@app.route('/save_selected_teams', methods=['POST'])
+def save_selected_teams():
+    selected_teams = request.json.get('selected_teams', [])
+    try:
+        create_selected_teams_table()
+        save_selected_teams_to_db(selected_teams)
+        return jsonify({'message': 'Teams saved successfully!'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def index():
@@ -208,9 +125,9 @@ def save_team():
     team_name = request.form['team_name']
     try:
         save_team_name(team_name)
-        return 'Team name saved successfully!'
+        return jsonify({'message': 'Team name saved successfully!'})
     except Exception as e:
-        return f'An error occurred: {str(e)}'
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
