@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -43,6 +43,22 @@ def save_team_name(team_name):
     conn.commit()
     conn.close()
 
+# Function to fetch team names from the database
+def get_team_names():
+    conn = sqlite3.connect('teams.db')
+    c = conn.cursor()
+    c.execute('''SELECT name FROM teams''')
+    teams = c.fetchall()
+    conn.close()
+    return teams
+
+# Endpoint to fetch team names
+@app.route('/get_teams')
+def get_teams():
+    teams = get_team_names()
+    print("Teams retrieved from database:", teams)  # Debugging statement
+    return jsonify([{'name': team[0]} for team in teams])
+
 @app.route('/')
 def index():
     session.clear()  # Clear session data
@@ -82,7 +98,6 @@ def save_team():
             return 'Team name saved successfully!'
         except Exception as e:
             return f'An error occurred: {str(e)}'
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

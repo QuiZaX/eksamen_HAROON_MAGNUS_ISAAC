@@ -45,7 +45,6 @@
             bottom: 0;
             width: 100%;
         }
-        /* Popup styles */
         .popup {
             position: fixed;
             top: 50%;
@@ -58,6 +57,17 @@
             display: none;
             z-index: 999;
         }
+        .team-list {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .team-list li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -65,62 +75,70 @@
         <h1>Ålholm IF</h1>
     </header>
     <nav>
-        <a href="/home" title="Home">Home</a>
-        <a href="/turnering" title="Kampe/tunering">Kampe/tunering</a>
+        <a href="{{ url_for('home') }}" title="Home">Home</a>
+        <a href="{{ url_for('turnering') }}" title="Kampe/tunering">Kampe/tunering</a>
         <a href="#" title="Spillere">Spillere</a>
         <a href="#" title="Nyheder">Nyheder</a>
-        <a href="/shop" title="Shop">Shop</a>
-        <a href="/matches" title="Matches">Matches</a> <!-- Added Matches button -->
+        <a href="{{ url_for('shop') }}" title="Shop">Shop</a>
+        <a href="{{ url_for('logout') }}" title="Logout">Logout</a>
     </nav>
     <section>
         <h2>Velkommen til Ålholm IF tunerings register</h2>
         <p>Her kan du sign up til tuneringer ved indsætte jeres hold navn</p>
 
-        <!-- Form to input team names -->
-        <form id="teamForm" action="/save_team" method="post">
+        <form id="teamForm" action="{{ url_for('save_team') }}" method="post">
             <label for="team_name">Indtast holdnavn:</label><br>
             <input type="text" id="team_name" name="team_name" required><br><br>
             <input type="submit" value="Gem holdnavn">
         </form>
-        <br> <!-- Added line break -->
-        <a href="/matches">Show Matches</a> <!-- Matches button -->
+
+        <h3>Registered Teams:</h3>
+        <ul id="teamList" class="team-list"></ul>
     </section>
     <footer>
         &copy; Ålholm IF. All rights reserved.
     </footer>
 
-    <!-- Popup for showing "Team saved" message -->
     <div id="popup" class="popup">
         Team saved
     </div>
 
     <script>
-        // JavaScript to handle form submission using AJAX
+        function fetchTeamNames() {
+            fetch('/get_teams')
+                .then(response => response.json())
+                .then(data => {
+                    const teamList = document.getElementById('teamList');
+                    teamList.innerHTML = '';
+                    data.forEach(team => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = team.name;
+                        teamList.appendChild(listItem);
+                    });
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchTeamNames);
+
         document.getElementById("teamForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
-            // Get the form data
-            var formData = new FormData(this);
-
-            // Create an AJAX request
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/save_team", true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        // If the request is successful, display the popup
-                        document.getElementById("popup").style.display = "block";
-                        setTimeout(function() {
-                            document.getElementById("popup").style.display = "none";
-                        }, 3000);
-                    } else {
-                        // If there's an error, you can handle it here
-                        console.error("Error:", xhr.statusText);
-                    }
+            const formData = new FormData(event.target);
+            fetch(event.target.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById("popup").style.display = "block";
+                    setTimeout(function() {
+                        document.getElementById("popup").style.display = "none";
+                    }, 3000);
+                    fetchTeamNames();
+                } else {
+                    alert('Error saving team name');
                 }
-            };
-            // Send the form data
-            xhr.send(formData);
+            });
         });
     </script>
 </body>
