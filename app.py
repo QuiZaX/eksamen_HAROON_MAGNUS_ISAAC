@@ -8,7 +8,7 @@ app.secret_key = "your_secret_key"  # Generate a secret key for Flask sessions
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Function to create initial database tables (users and teams)
+# Function to create initial database tables (users, teams, and tournaments)
 def create_initial_tables():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -19,6 +19,50 @@ def create_initial_tables():
     conn = sqlite3.connect('teams.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, name TEXT)''')
+    conn.commit()
+    conn.close()
+
+    conn = sqlite3.connect('tournaments.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY, name TEXT)''')
+    conn.commit()
+    conn.close()
+
+# Function to dynamically create tournament tables if they do not exist
+def create_dynamic_tables(tournament_name):
+    conn = sqlite3.connect('leaderboard.db')
+    c = conn.cursor()
+
+    c.execute(f'''
+        CREATE TABLE IF NOT EXISTS "{tournament_name}_groups" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_name TEXT NOT NULL,
+            team_name TEXT NOT NULL
+        )
+    ''')
+
+    c.execute(f'''
+        CREATE TABLE IF NOT EXISTS "{tournament_name}_matches" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_name TEXT NOT NULL,
+            team1 TEXT NOT NULL,
+            team2 TEXT NOT NULL,
+            goals_team1 INTEGER NOT NULL,
+            goals_team2 INTEGER NOT NULL,
+            result TEXT NOT NULL,
+            knockout INTEGER NOT NULL
+        )
+    ''')
+
+    c.execute(f'''
+        CREATE TABLE IF NOT EXISTS "{tournament_name}_standings" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_name TEXT NOT NULL,
+            team_name TEXT NOT NULL,
+            points INTEGER NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -75,6 +119,75 @@ def save_selected_teams_to_db(selected_teams):
     conn.commit()
     conn.close()
 
+# Function to get leaderboard data
+def get_leaderboard_data(tournament_name):
+    conn = sqlite3.connect('leaderboard.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        c.execute(f'SELECT group_name, team_name, points FROM "{tournament_name}_standings" ORDER BY points DESC')
+        standings = c.fetchall()
+        logging.debug(f"Standings for {tournament_name}: {standings}")
+    except sqlite3.OperationalError as e:
+        logging.error(f"Database error: {e}")
+        standings = []
+    leaderboard = [{'group_name': row['group_name'], 'team_name': row['team_name'], 'points': row['points']} for row in standings]
+    conn.close()
+    return leaderboard
+
+# Function to get groups and teams data
+def get_groups_data(tournament_name):
+    conn = sqlite3.connect('leaderboard.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        c.execute(f'SELECT id, group_name, team_name FROM "{tournament_name}_groups"')
+        groups = c.fetchall()
+        logging.debug(f"Groups for {tournament_name}: {groups}")
+    except sqlite3.OperationalError as e:
+        logging.error(f"Database error: {e}")
+        groups = []
+    conn.close()
+    return groups
+
+# Function to get match results data and determine the champion
+def get_matches_data(tournament_name):
+    conn = sqlite3.connect('leaderboard.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        c.execute(f'SELECT id, group_name, team1, team2, goals_team1, goals_team2, result, knockout FROM "{tournament_name}_matches" ORDER BY id DESC')
+        matches = c.fetchall()
+        logging.debug(f"Matches for {tournament_name}: {matches}")
+
+        # Determine the champion (winner of the last match)
+        if matches:
+            last_match = matches[0]
+            if last_match['goals_team1'] > last_match['goals_team2']:
+                champion = last_match['team1']
+            elif last_match['goals_team1'] < last_match['goals_team2']:
+                champion = last_match['team2']
+            else:
+                champion = "Draw"
+        else:
+            champion = None
+    except sqlite3.OperationalError as e:
+        logging.error(f"Database error: {e}")
+        matches = []
+        champion = None
+    conn.close()
+    return matches, champion
+
+# Function to get all tournament names from the database
+def get_tournament_names():
+    conn = sqlite3.connect('leaderboard.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    tournament_names = {table[0].split('_')[0] for table in tables if '_' in table[0]}
+    conn.close()
+    return sorted(tournament_names)
+
 @app.route('/get_teams')
 def get_teams():
     teams = get_team_names()
@@ -89,6 +202,11 @@ def save_selected_teams():
         return jsonify({'message': 'Teams saved successfully!'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/leaderboard/<tournament_name>', methods=['GET'])
+def get_leaderboard(tournament_name):
+    leaderboard = get_leaderboard_data(tournament_name)
+    return jsonify(leaderboard)
 
 @app.route('/')
 def index():

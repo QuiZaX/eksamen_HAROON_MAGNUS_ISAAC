@@ -91,13 +91,10 @@
         <h1>Leaderboard for {{ tournament_name if tournament_name else 'Tournament' }}</h1>
     </header>
     <nav>
-        <a href="{{ url_for('home') }}" title="Home">Home</a>
-        <a href="{{ url_for('turnering') }}" title="Kampe/tunering">Kampe/tunering</a>
-        <a href="#" title="Spillere">Spillere</a>
-        <a href="#" title="Nyheder">Nyheder</a>
-        <a href="{{ url_for('shop') }}" title="Shop">Shop</a>
+        <a href="/home">Home</a>
+        <a href="/shop">Shop</a>
         <a href="{{ url_for('logout') }}" title="Logout">Logout</a>
-        <a href="#" onclick="showSection('leaderboardSection')">Leaderboard</a>
+        <a href="/matches">Matches</a>
         <a href="#" onclick="showSection('tournamentsSection')">Tournaments</a>
     </nav>
     <section id="leaderboardSection">

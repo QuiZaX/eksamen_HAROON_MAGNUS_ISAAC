@@ -121,9 +121,9 @@
     </header>
     <nav>
         <a href="/home">Home</a>
-        <a href="/turnering">Kampe/tunering</a>
-        <a href="#">Spillere</a>
-        <a href="#">Nyheder</a>
+        <a href="/shop">Shop</a>
+        <a href="{{ url_for('logout') }}" title="Logout">Logout</a>
+        <a href="/matches">Matches</a>
         <a href="#" class="cart-icon">
             <img src="{{ url_for('static', filename='soppingcart.jpg') }}" alt="Shopping Cart">
             <span class="cart-count">0</span>
@@ -147,7 +147,7 @@
             <h3>Støvler</h3>
             <img src="{{ url_for('static', filename='stovler.jpg') }}" alt="Støvler">
             <p>Pris: 750 DKK</p>
-            <button class="buy-btn" data-name="støvler" data-price="750">Køb nu</button>
+            <button class="buy-btn" data-name="Støvler" data-price="750">Køb nu</button>
         </div>
         <!-- Add more products here -->
     </section>
@@ -164,7 +164,46 @@
     </div>
 
     <script>
-        // Your JavaScript code here
+        document.addEventListener('DOMContentLoaded', function() {
+            const cart = [];
+            const cartItemsContainer = document.querySelector('.cart-items');
+            const cartTotalElement = document.querySelector('.cart-total');
+            const cartCountElement = document.querySelector('.cart-count');
+            const cartElement = document.querySelector('.cart');
+
+            function updateCart() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.classList.add('cart-item');
+                    cartItem.textContent = `${item.name} - ${item.price} DKK`;
+                    cartItemsContainer.appendChild(cartItem);
+                    total += item.price;
+                });
+                cartTotalElement.textContent = `Total: ${total} DKK`;
+                cartCountElement.textContent = cart.length;
+            }
+
+            document.querySelectorAll('.buy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const name = this.getAttribute('data-name');
+                    const price = parseInt(this.getAttribute('data-price'));
+                    cart.push({ name, price });
+                    updateCart();
+                    cartElement.style.display = 'block';
+                });
+            });
+
+            document.querySelector('.cart-icon').addEventListener('click', function() {
+                cartElement.style.display = cartElement.style.display === 'none' ? 'block' : 'none';
+            });
+
+            document.querySelector('.checkout-btn').addEventListener('click', function() {
+                alert('Proceeding to checkout!');
+                // Add your checkout logic here
+            });
+        });
     </script>
 </body>
 </html>
