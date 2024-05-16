@@ -2,9 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Playoff Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #005580;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+        }
+        nav {
+            background-color: #003d4d;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        section {
+            padding: 20px;
+        }
+        footer {
+            background-color: #005580;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 999;
+        }
+        .team-list, .leaderboard {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .team-list li, .leaderboard li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .group, .knockout-stage {
+            margin: 20px 0;
+        }
+        .group h2, .knockout-stage h2 {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>Football Playoff Leaderboard</h1>
+    </header>
+    <nav>
+        <a href="#" title="Home">Home</a>
+        <a href="#" title="Kampe/tunering">Kampe/tunering</a>
+        <a href="#" title="Spillere">Spillere</a>
+        <a href="#" title="Nyheder">Nyheder</a>
+        <a href="#" title="Shop">Shop</a>
+        <a href="#" title="Logout">Logout</a>
+    </nav>
+    <section>
+        <h2>Group Standings</h2>
+        <div id="groups"></div>
+        <div class="knockout-stage">
+            <h2>Knockout Stage</h2>
+            <ul id="knockout-teams"></ul>
+        </div>
+    </section>
+    <footer>
+        &copy; Football Playoff. All rights reserved.
+    </footer>
 
+    <div id="popup" class="popup">
+        Team saved
+    </div>
+
+    <script src="leaderboard.js"></script>
 </body>
 </html>
