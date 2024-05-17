@@ -17,3 +17,6 @@ dden tunerings navn man vil se og så kommer der et score board op
 
 Der også en shop på siden der kan bruges til købe fodbold tøj
 ![img_1.png](img_1.png)
+
+
+koden er skrev af Isaac, Haroon og Magnus. S
